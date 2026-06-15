@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v20260615.1-W24-165-cmp-p3 -->
+<!DOCTYPE html><!-- v20260615.2-W24-165-cmp-p3 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -974,19 +974,6 @@ var CMP=(function(){
     html+='</div>';
     html+='<div style="max-width:600px;margin:0 auto;padding:12px">';
 
-    // Product cards
-    prods.forEach(function(p,i){
-      html+='<div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">';
-      html+='<div style="display:inline-block;background:'+colors[i]+';color:#fff;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600;margin-bottom:6px">'+String.fromCharCode(9312+i)+'</div>';
-      html+='<div style="font-size:15px;font-weight:700;margin-bottom:4px">'+p.n+'</div>';
-      html+='<div style="font-size:13px;color:#5f6368;margin-bottom:6px">品牌: '+p.b+'</div>';
-      html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
-      html+='<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#e8f0fe;color:#1a73e8">'+(catMap[p.c]||p.c)+'</span>';
-      if(p.m)html+='<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#e8f0fe;color:#1a73e8">'+p.m+'</span>';
-      if(p.s)html+='<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#fef3e0;color:#e8710a">'+p.s+'</span>';
-      html+='</div></div>';
-    });
-
     // Loading state for analysis
     html+='<div id="cmpAnalysis" style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">';
     html+='<h3 style="font-size:15px;font-weight:700;margin-bottom:12px">7维度深度对比</h3>';
@@ -1072,7 +1059,11 @@ var CMP=(function(){
       var out='<h3 style="font-size:15px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee">7维度深度对比</h3>';
       out+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
       out+='<tr style="background:#f0f4ff"><td style="padding:6px 8px;font-weight:600;color:#333">维度</td>';
-      prods.forEach(function(p,i){out+='<td style="padding:6px 4px;text-align:center;font-weight:600;color:'+colors[i]+'">'+String.fromCharCode(9312+i)+'</td>';});
+      prods.forEach(function(p,i){var pInfo=p.b;
+      var pTags=(catMap[p.c]||p.c);
+      if(p.m)pTags+='·'+p.m.replace(/\//g,'/');
+      if(p.s)pTags+='·'+p.s.replace(/\//g,'/');
+      out+='<td style="padding:8px 4px;text-align:center;vertical-align:top;min-width:80px"><div style="font-size:14px;font-weight:700;color:'+colors[i]+';margin-bottom:3px">'+String.fromCharCode(9312+i)+'</div><div style="font-size:11px;font-weight:600;color:#333;line-height:1.3">'+pInfo+'</div><div style="font-size:10px;color:#666;line-height:1.3;margin-top:2px">'+pTags+'</div></td>';});
       out+='</tr>';
       dimNames.forEach(function(dim,di){
         var bg=di%2===0?'#fff':'#fafbfc';
