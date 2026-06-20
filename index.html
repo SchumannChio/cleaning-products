@@ -96,6 +96,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .bb-btn.pri:disabled{background:#e0e0e0;color:#999;cursor:not-allowed;box-shadow:none}
 .bb-btn.sec{background:#fff;color:#e65100;border:1.5px solid #ff8f00}
 .bb-btn.fav-btn{background:#fff8f0;color:#e65100;border:1.5px solid #ffcc80}
+.bb-btn.sel-btn{background:#fff0f0;color:#d32f2f;border:1.5px solid #ef9a9a}
 .cmp-toast{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.78);color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;z-index:200;display:none;pointer-events:none}
 .cmp-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:150;display:none;align-items:flex-end;justify-content:center}
 .cmp-modal.show{display:flex}
@@ -1273,6 +1274,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 </div>
 <div class="bb-right">
 <button class="bb-btn fav-btn" id="favBtn">☆ 收藏夹</button>
+<button class="bb-btn sel-btn" id="selListBtn">📋 管理已选</button>
 <button class="bb-btn pri" disabled="" id="cmpBtn">📊 开始对比</button>
 </div>
 </div>
@@ -1294,6 +1296,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <span class="cmp-modal-close" id="favClose">×</span>
 </div>
 <div class="cmp-modal-bd" id="favBody"></div>
+</div>
+</div>
+<!-- 已选产品管理弹窗 -->
+<div class="cmp-modal" id="selModal">
+<div class="cmp-modal-inner">
+<div class="cmp-modal-hd">
+<h3>📋 已选产品</h3>
+<span class="cmp-modal-close" id="selClose">×</span>
+</div>
+<div class="cmp-modal-bd" id="selBody"></div>
 </div>
 </div>
 <!-- Toast -->
@@ -1391,6 +1403,9 @@ var CMP=(function(){
     document.getElementById('favBtn').addEventListener('click',toggleFavPanel);
     document.getElementById('cmpClose').addEventListener('click',closeModal);
     document.getElementById('favClose').addEventListener('click',closeFavPanel);
+    document.getElementById('selListBtn').addEventListener('click',toggleSelPanel);
+    document.getElementById('selClose').addEventListener('click',closeSelPanel);
+    document.getElementById('selModal').addEventListener('click',function(e){if(e.target===this)closeSelPanel();});
     document.getElementById('cmpModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
     document.getElementById('favModal').addEventListener('click',function(e){if(e.target===this)closeFavPanel();});
   }
@@ -1436,12 +1451,14 @@ var CMP=(function(){
     var cntEl=document.getElementById('selCnt');
     var btn=document.getElementById('cmpBtn');
     var favBtnEl=document.getElementById('favBtn');
+    var selBtnEl=document.getElementById('selListBtn');
     if(!bar)return;
     var show=selected.length>0||favorites.length>0;
     bar.className=show?'bb show':'bb';
     if(cntEl)cntEl.textContent=selected.length;
     if(btn)btn.disabled=selected.length<2;
     if(favBtnEl)favBtnEl.innerHTML=(favorites.length>0?'\u2605 ':'\u2606 ')+'收藏夹'+(favorites.length>0?'('+favorites.length+')':'');
+    if(selBtnEl){selBtnEl.style.display=selected.length>0?'':'none';selBtnEl.innerHTML='\uD83D\uDCCB 管理已选'+(selected.length>0?'('+selected.length+')':'');}
   }
 
   function toast(msg){
@@ -1566,6 +1583,51 @@ var CMP=(function(){
     if(added>0)toast('已添加'+added+'个到对比');
     else if(selected.length>=MAX)toast('已选满'+MAX+'个');
     else toast('收藏产品已在对比列表中');
+  }
+
+  function toggleSelPanel(){
+    var modal=document.getElementById('selModal');
+    if(modal.classList.contains('show')){closeSelPanel();return;}
+    renderSelPanel();modal.classList.add('show');
+  }
+
+  function closeSelPanel(){document.getElementById('selModal').classList.remove('show');}
+
+  function renderSelPanel(){
+    var cards=document.querySelectorAll('.cd');
+    var body=document.getElementById('selBody');
+    if(selected.length===0){
+      body.innerHTML='<div class="fav-empty">暂未选择产品<div class="fav-empty-sub">点击产品卡右上角的勾选框选择对比</div></div>';
+      return;
+    }
+    var html='<div style="margin-bottom:12px"><button class="bb-btn sec" style="width:100%;padding:12px;background:#d32f2f;color:#fff;border:1.5px solid #d32f2f" id="clearAllSelBtn">✕ 清空全部已选</button></div>';
+    selected.forEach(function(idx){
+      var card=cards[parseInt(idx)-1];if(!card)return;
+      var info=getInfo(card,idx);
+      html+='<div class="cmp-prod" style="padding:10px" data-sel-idx="'+idx+'">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+      html+='<div style="flex:1;min-width:0"><span class="cmp-prod-name" style="font-size:13px">'+esc(info.brand)+' '+esc(info.name)+'</span>';
+      html+='<div class="cmp-prod-info">'+catLabel(info.category)+' | '+esc(info.material)+'</div></div>';
+      html+='<span style="cursor:pointer;font-size:16px;color:#d32f2f;flex-shrink:0;margin-left:8px;padding:4px 8px;border:1.5px solid #ef9a9a;border-radius:6px;background:#fff0f0" data-desel-idx="'+idx+'">✕ 取消</span>';
+      html+='</div></div>';
+    });
+    body.innerHTML=html;
+    document.getElementById('clearAllSelBtn').addEventListener('click',function(){
+      selected.forEach(function(idx){
+        var card=document.querySelector('.cd[data-idx="'+idx+'"]');
+        if(card){card.classList.remove('cmp-sel');var cb=card.querySelector('.card-cb');if(cb)cb.checked=false;}
+      });
+      selected=[];localStorage.setItem(SK_SEL,JSON.stringify(selected));updateBar();renderSelPanel();toast('已清空全部选品');
+    });
+    body.querySelectorAll('[data-desel-idx]').forEach(function(el){
+      el.addEventListener('click',function(){
+        var idx=this.getAttribute('data-desel-idx');
+        toggleSel(idx,false);
+        var cb=document.querySelector('.card-cb[data-idx="'+idx+'"]');
+        if(cb)cb.checked=false;
+        renderSelPanel();
+      });
+    });
   }
 
   function esc(s){return s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):s;}
@@ -1828,7 +1890,7 @@ var CMP=(function(){
   }
 
 
-return{init:init,toggleFav:toggleFav,renderFavPanel:renderFavPanel,addFavToSel:addFavToSel,toast:toast};
+return{init:init,toggleFav:toggleFav,renderFavPanel:renderFavPanel,addFavToSel:addFavToSel,renderSelPanel:renderSelPanel,toast:toast};
 })();
 
 document.addEventListener('DOMContentLoaded',function(){CMP.init();});
