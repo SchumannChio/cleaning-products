@@ -128,7 +128,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <div class="st"><div class="n" id="cntDv">0</div><div class="l"><i class="dot dv"></i>设备</div></div>
 <div class="st"><div class="n" id="cntMt">0</div><div class="l"><i class="dot mt"></i>方法</div></div>
 </div>
-<div class="wf"><span class="wl">周次筛选:</span><select id="wf" onchange="go()"><option value="">全部周次</option><option value="22">2026W22 (6.1)</option><option value="23">2026W23 (6.5)</option><option value="24">2026W24 (6.14)</option><option selected="" value="25">2026W25 (6.15)</option><option value="26">2026W26</option>
+<div class="wf"><span class="wl">周次筛选:</span><select id="wf" onchange="go()"><option selected value="">全部周次</option><option value="22">2026W22 (6.1)</option><option value="23">2026W23 (6.5)</option><option value="24">2026W24 (6.14)</option><option value="25">2026W25 (6.15)</option><option value="26">2026W26</option>
 <option value="27">2026W27</option>
 <option value="28">2026W28</option></select></div>
 <div class="ft">
@@ -2090,6 +2090,7 @@ function go(){
   var te=document.getElementById('cntTl');if(te)te.textContent=cats.tool;
   var de=document.getElementById('cntDv');if(de)de.textContent=cats.device;
   var me=document.getElementById('cntMt');if(me)me.textContent=cats.method;
+  document.getElementById('wf').value='';
   go();
 })();
 </script>
